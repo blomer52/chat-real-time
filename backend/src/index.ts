@@ -6,8 +6,8 @@ import { Server as SocketServer } from "socket.io";
 import dotenv from "dotenv";
 import initializeDb from "./db";
 import authRoutes from "./routes/auth.routes";
-//import chatRoutes from "./routes/chat.routes";
-//import setupSocket from "./sockets/chat.socket";
+import chatRoutes from "./routes/chat.routes";
+import setupSocket from "./sockets/chat.socket";
 
 // Cargar variables de entorno
 dotenv.config();
@@ -34,7 +34,7 @@ app.get("/api/ping", (_, res) => res.send("pong"));
 
 // Rutas principales
 app.use("/api/auth", authRoutes);
-//app.use("/api/chat", chatRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Inicializar DB y lanzar servidor
 initializeDb().then((db) => {
@@ -42,7 +42,7 @@ initializeDb().then((db) => {
   app.set("db", db);
 
   // Inicializar sockets
-  //setupSocket(io);
+  setupSocket(io);
 
   const PORT = process.env.PORT || 3001;
   server.listen(PORT, () => {
