@@ -4,6 +4,9 @@ import { useAuthStore } from "../store/useAuthStore";
 import type { ChatMessage } from "../services/api";
 import io from "socket.io-client";
 
+import { logout } from "../services/api";
+import { useNavigate } from "react-router-dom";
+
 const socket = io("http://localhost:3001", {
   withCredentials: true,
 });
@@ -13,6 +16,7 @@ const ChatPage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [content, setContent] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Cargar mensajes iniciales
@@ -36,6 +40,16 @@ const ChatPage = () => {
     setContent(""); // Limpiar input después de enviar
   };
 
+  const handleLogout = async () => {
+  try {
+    await logout();
+    navigate("/login");
+    location.reload(); // para limpiar Zustand en caliente
+  } catch (err) {
+    alert("Error al cerrar sesión");
+  }
+}
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -43,6 +57,7 @@ const ChatPage = () => {
   return (
     <div style={{ padding: 20 }}>
       <h2>Chat</h2>
+      <button onClick={handleLogout}>Cerrar sesión</button>
       <div
         style={{
           border: "1px solid #ccc",

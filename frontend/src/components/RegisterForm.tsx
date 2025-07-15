@@ -1,39 +1,38 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { register } from "../services/api";
 
-interface Props {
-  onLogin: (username: string, password: string) => void;
-}
-
-export default function LoginForm({ onLogin }: Props) {
+export default function RegisterForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(username, password);
+    try {
+      await register({ username, password });
+      alert("Registro exitoso. Ahora inicia sesión.");
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Error al registrar");
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Iniciar sesión</h2>
+      <h2>Registrarse</h2>
       <input
         type="text"
         placeholder="Usuario"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        required
       />
       <input
         type="password"
         placeholder="Contraseña"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        required
       />
-      <button type="submit">Entrar</button>
-      <p>
-        ¿No tenés cuenta? <Link to="/register">Registrate acá</Link>
-      </p>
-
+      <button type="submit">Crear cuenta</button>
     </form>
   );
 }
