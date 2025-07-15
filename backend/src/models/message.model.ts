@@ -1,17 +1,33 @@
 import type { Database } from "sqlite";
 
+// Obtener todos los mensajes
 export async function getAllMessages(db: Database) {
-  return db.all(`
-    SELECT messages.id, content, timestamp, users.username AS sender
+  return await db.all(`
+    SELECT messages.id, messages.content, users.username
     FROM messages
-    JOIN users ON users.id = messages.sender_id
-    ORDER BY timestamp ASC
+    JOIN users ON messages.user_id = users.id
+    ORDER BY messages.id ASC
   `);
 }
 
-export async function createMessage(db: Database, senderId: number, content: string) {
-  return db.run(
-    `INSERT INTO messages (sender_id, content) VALUES (?, ?)`,
-    [senderId, content]
+// Crear nuevo mensaje y devolverlo completo
+export async function createMessage(db: Database, userId: number, content: string) {
+  const result = await db.run(
+    "INSERT INTO messages (user_id, content) VALUES (?, ?)",
+    [userId, content]
   );
+
+  const id = result.lastID;
+
+  const message = await db.get(
+    `
+    SELECT messages.id, messages.content, users.username
+    FROM messages
+    JOIN users ON messages.user_id = users.id
+    WHERE messages.id = ?
+    `,
+    [id]
+  );
+
+  return message;
 }

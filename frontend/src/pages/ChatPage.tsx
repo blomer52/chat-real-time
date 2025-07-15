@@ -33,7 +33,7 @@ const ChatPage = () => {
     if (!content.trim()) return;
 
     await sendMessage(content);
-    setContent("");
+    setContent(""); // Limpiar input después de enviar
   };
 
   useEffect(() => {

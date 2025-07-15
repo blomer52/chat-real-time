@@ -38,10 +38,9 @@ app.use("/api/chat", chatRoutes);
 
 // Inicializar DB y lanzar servidor
 initializeDb().then((db) => {
-  // Guardamos la instancia de la DB para usar con sockets u otros
   app.set("db", db);
+  app.set("io", io); // ✅ guardamos la instancia de io en la app
 
-  // Inicializar sockets
   setupSocket(io);
 
   const PORT = process.env.PORT || 3001;
