@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 import { useAuthStore } from "../store/useAuthStore";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -11,8 +12,10 @@ export default function LoginPage() {
   const handleLogin = async (username: string, password: string) => {
     const success = await login(username, password);
     if (success) {
+      toast.success("Sesión iniciada");
       navigate("/chat");
     } else {
+      toast.error("Credenciales incorrectas");
       setError("Credenciales incorrectas");
     }
   };

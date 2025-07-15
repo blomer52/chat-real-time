@@ -1,7 +1,7 @@
-// src/pages/RegisterPage.tsx
 import { useState } from "react";
 import { register } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -12,9 +12,10 @@ export default function RegisterPage() {
     e.preventDefault();
     try {
       await register({ username, password });
+      toast.success("Usuario creado correctamente");
       navigate("/login");
     } catch {
-      alert("Error al registrarse");
+      toast.error("Error al registrarse");
     }
   };
 
@@ -45,7 +46,6 @@ export default function RegisterPage() {
           Registrarse
         </button>
 
-        {/* 🔁 Enlace para volver a login */}
         <button
           type="button"
           className="w-full mt-3 text-sm text-yellow-600 underline"

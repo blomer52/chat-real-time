@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { getMessages, sendMessage } from "../services/api";
+import { getMessages, sendMessage, logout } from "../services/api";
 import { useAuthStore } from "../store/useAuthStore";
 import type { ChatMessage } from "../services/api";
 import io from "socket.io-client";
-
-import { logout } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const socket = io("http://localhost:3001", {
   withCredentials: true,
 });
 
 const ChatPage = () => {
-  const { user } = useAuthStore();
+  const { user } = useAuthStore() as { user: { username: string } | null };
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [content, setContent] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -25,30 +24,40 @@ const ChatPage = () => {
     // Recibir mensajes en tiempo real
     socket.on("newMessage", (msg) => {
       setMessages((prev) => [...prev, msg]);
+
+      // Mostrar notificación solo si el mensaje viene de otro usuario
+      if (msg.username !== user?.username) {
+        toast.info(`Nuevo mensaje de ${msg.username}`);
+      }
     });
 
     return () => {
       socket.off("newMessage");
     };
-  }, []);
+  }, [user?.username]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
 
-    await sendMessage(content);
-    setContent(""); // Limpiar input después de enviar
+    try {
+      await sendMessage(content);
+      setContent("");
+    } catch {
+      toast.error("No se pudo enviar el mensaje");
+    }
   };
 
   const handleLogout = async () => {
-  try {
-    await logout();
-    navigate("/login");
-    location.reload(); // para limpiar Zustand en caliente
-  } catch (err) {
-    alert("Error al cerrar sesión");
-  }
-}
+    try {
+      await logout();
+      useAuthStore.getState().logout(); // limpiar Zustand
+      toast.success("Sesión cerrada");
+      navigate("/login");
+    } catch (err) {
+      toast.error("Error al cerrar sesión");
+    }
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -83,7 +92,7 @@ const ChatPage = () => {
           placeholder="Escribe un mensaje..."
           style={{ width: "70%" }}
         />
-        <button type="submit" style={{ marginLeft: 10 }}>
+        <button type="submit" style={{ marginLeft: 10 }} disabled={!content.trim()}>
           Enviar
         </button>
       </form>
