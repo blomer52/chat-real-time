@@ -1,12 +1,16 @@
 import type { Database } from "sqlite";
 
-export async function getPrivateMessages(db: Database, user1: number, user2: number) {
+export async function getPrivateMessages(db: Database, userId: number, otherUserId: number) {
   return db.all(
-    `SELECT * FROM private_messages
-     WHERE (sender_id = ? AND receiver_id = ?)
-        OR (sender_id = ? AND receiver_id = ?)
-     ORDER BY timestamp ASC`,
-    [user1, user2, user2, user1]
+    `
+    SELECT private_messages.id, private_messages.content, users.username
+    FROM private_messages
+    JOIN users ON users.id = private_messages.sender_id
+    WHERE (sender_id = ? AND recipient_id = ?)
+       OR (sender_id = ? AND recipient_id = ?)
+    ORDER BY private_messages.id ASC
+    `,
+    [userId, otherUserId, otherUserId, userId]
   );
 }
 

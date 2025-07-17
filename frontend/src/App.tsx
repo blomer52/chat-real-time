@@ -3,6 +3,7 @@ import LoginPage from "./pages/LoginPage";
 import ChatPage from "./pages/ChatPage";
 import RegisterPage from "./pages/RegisterPage";
 import { useAuthStore } from "./store/useAuthStore";
+import './index.css' // 👈 Importa Tailwind aquí
 
 export default function App() {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
